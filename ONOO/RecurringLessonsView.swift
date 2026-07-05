@@ -170,7 +170,7 @@ struct RecurringTemplateCard: View {
 
     private var fee: Double {
         if let feeOverride = template.feeOverride { return feeOverride }
-        return Double(template.duration) / 60.0 * (template.student?.hourlyRate ?? 0)
+        return Lesson.standardFee(for: template.student, duration: template.duration)
     }
 }
 
@@ -202,7 +202,7 @@ struct RecurringTemplateFormView: View {
         _time = State(initialValue: Calendar.tr.date(from: comps) ?? Date())
 
         _duration = State(initialValue: template?.duration ?? 60)
-        _useCustomFee = State(initialValue: template?.feeOverride != nil)
+        _useCustomFee = State(initialValue: template?.usesCustomFee ?? false)
         _customFee = State(initialValue: template?.feeOverride ?? 0)
         _isPaused = State(initialValue: template?.isPaused ?? false)
     }
@@ -216,7 +216,7 @@ struct RecurringTemplateFormView: View {
     }
 
     private var defaultFee: Double {
-        Double(duration) / 60.0 * (selectedStudent?.hourlyRate ?? 0)
+        Lesson.standardFee(for: selectedStudent, duration: duration)
     }
 
     var body: some View {
@@ -306,6 +306,7 @@ struct RecurringTemplateFormView: View {
             template.minute = minute
             template.duration = duration
             template.feeOverride = fee
+            template.usesCustomFee = useCustomFee
             template.isPaused = isPaused
             if scheduleChanged {
                 RecurringLessons.regenerate(template, in: context)
@@ -318,7 +319,8 @@ struct RecurringTemplateFormView: View {
                                               hour: hour,
                                               minute: minute,
                                               duration: duration,
-                                              feeOverride: fee)
+                                              feeOverride: fee,
+                                              usesCustomFee: useCustomFee)
             context.insert(new)
             new.student = student
             try? context.save()

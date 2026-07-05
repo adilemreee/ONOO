@@ -206,6 +206,8 @@ final class Lesson {
     var note: String = ""
     /// Saatlik ücret yerine derse özel sabit ücret
     var feeOverride: Double? = nil
+    /// Ücret elle girildiyse true; false ise kayıt anındaki saatlik ücretten kilitlenmiştir
+    var usesCustomFee: Bool = false
     var student: Student? = nil
     /// Ders bir tekrar şablonundan üretildiyse kaynağı
     var sourceTemplate: RecurringLessonTemplate? = nil
@@ -217,7 +219,8 @@ final class Lesson {
          cancellationReason: CancellationReason = .none,
          topic: String = "",
          note: String = "",
-         feeOverride: Double? = nil) {
+         feeOverride: Double? = nil,
+         usesCustomFee: Bool = false) {
         self.student = student
         self.date = date
         self.duration = duration
@@ -226,6 +229,7 @@ final class Lesson {
         self.topic = topic
         self.note = note
         self.feeOverride = feeOverride
+        self.usesCustomFee = usesCustomFee
     }
 
     var status: LessonStatus {
@@ -249,7 +253,17 @@ final class Lesson {
 
     var fee: Double {
         if let feeOverride { return feeOverride }
-        return Double(duration) / 60.0 * (student?.hourlyRate ?? 0)
+        return Self.standardFee(for: student, duration: duration)
+    }
+
+    static func standardFee(for student: Student?, duration: Int) -> Double {
+        Double(duration) / 60.0 * (student?.hourlyRate ?? 0)
+    }
+
+    func lockCurrentStandardFeeIfNeeded() {
+        guard feeOverride == nil else { return }
+        feeOverride = Self.standardFee(for: student, duration: duration)
+        usesCustomFee = false
     }
 }
 
@@ -327,6 +341,8 @@ final class RecurringLessonTemplate {
     var duration: Int = 60
     /// Saatlik ücret yerine derse özel sabit ücret
     var feeOverride: Double? = nil
+    /// Ücret elle girildiyse true; false ise üretilen derslerde o günkü saatlik ücret kilitlenir
+    var usesCustomFee: Bool = false
     /// Duraklatılan şablon yeni ders üretmez
     var isPaused: Bool = false
     var createdAt: Date = Date()
@@ -343,6 +359,7 @@ final class RecurringLessonTemplate {
          minute: Int = 0,
          duration: Int = 60,
          feeOverride: Double? = nil,
+         usesCustomFee: Bool = false,
          isPaused: Bool = false) {
         self.student = student
         self.weekday = weekday
@@ -350,6 +367,7 @@ final class RecurringLessonTemplate {
         self.minute = minute
         self.duration = duration
         self.feeOverride = feeOverride
+        self.usesCustomFee = usesCustomFee
         self.isPaused = isPaused
     }
 

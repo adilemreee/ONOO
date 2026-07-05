@@ -166,7 +166,8 @@ struct QuickLessonFormView: View {
                             status: .planned,
                             topic: "",
                             note: "",
-                            feeOverride: nil)
+                            feeOverride: Lesson.standardFee(for: student, duration: duration),
+                            usesCustomFee: false)
         context.insert(lesson)
         lesson.student = student
         try? context.save()

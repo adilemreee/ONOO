@@ -389,6 +389,9 @@ struct StudentFormView: View {
 
     private func save() {
         if let student {
+            if abs(student.hourlyRate - hourlyRate) > 0.001 {
+                lockExistingStandardLessonFees(for: student)
+            }
             student.name = name
             student.subject = subject
             student.grade = grade
@@ -414,5 +417,11 @@ struct StudentFormView: View {
         }
         try? context.save()
         dismiss()
+    }
+
+    private func lockExistingStandardLessonFees(for student: Student) {
+        for lesson in student.allLessons where !lesson.usesCustomFee {
+            lesson.lockCurrentStandardFeeIfNeeded()
+        }
     }
 }

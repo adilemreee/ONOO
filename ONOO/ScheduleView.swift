@@ -691,8 +691,8 @@ struct LessonFormView: View {
         _duration = State(initialValue: lesson?.duration ?? 60)
         _topic = State(initialValue: lesson?.topic ?? "")
         _note = State(initialValue: lesson?.note ?? "")
-        _useCustomFee = State(initialValue: lesson?.feeOverride != nil)
-        _customFee = State(initialValue: lesson?.feeOverride ?? 0)
+        _useCustomFee = State(initialValue: lesson?.usesCustomFee ?? false)
+        _customFee = State(initialValue: lesson?.feeOverride ?? lesson?.fee ?? 0)
         let initialReason = lesson?.cancellationReason ?? .student
         _cancellationReason = State(initialValue: initialReason == .none ? .student : initialReason)
     }
@@ -706,7 +706,7 @@ struct LessonFormView: View {
     }
 
     private var defaultFee: Double {
-        Double(duration) / 60.0 * (selectedStudent?.hourlyRate ?? 0)
+        Lesson.standardFee(for: selectedStudent, duration: duration)
     }
 
     var body: some View {
@@ -751,7 +751,7 @@ struct LessonFormView: View {
                 }
 
                 Section("Ücret") {
-                    LabeledContent("Standart ücret", value: Fmt.money(defaultFee))
+                    LabeledContent(useCustomFee ? "Standart ücret" : "Kaydedilecek ücret", value: Fmt.money(defaultFee))
                     Toggle("Derse özel ücret", isOn: $useCustomFee)
                     if useCustomFee {
                         HStack {
@@ -868,7 +868,7 @@ struct LessonFormView: View {
         comps.hour = t.hour
         comps.minute = t.minute
         let start = cal.date(from: comps) ?? day
-        let fee: Double? = useCustomFee ? customFee : nil
+        let fee = useCustomFee ? customFee : Lesson.standardFee(for: student, duration: duration)
 
         if let lesson {
             lesson.student = student
@@ -879,6 +879,7 @@ struct LessonFormView: View {
             lesson.topic = topic
             lesson.note = note
             lesson.feeOverride = fee
+            lesson.usesCustomFee = useCustomFee
         } else {
             for i in 0...repeatWeeks {
                 let lessonDate = start.adding(days: 7 * i)
@@ -888,7 +889,8 @@ struct LessonFormView: View {
                                  cancellationReason: i == 0 && status == .cancelled ? cancellationReason : .none,
                                  topic: i == 0 ? topic : "",
                                  note: i == 0 ? note : "",
-                                 feeOverride: fee)
+                                 feeOverride: fee,
+                                 usesCustomFee: useCustomFee)
                 context.insert(new)
                 new.student = student
             }

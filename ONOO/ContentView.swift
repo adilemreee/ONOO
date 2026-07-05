@@ -8,6 +8,7 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var context
+    @AppStorage("didMigrateLockedLessonFeesV1") private var didMigrateLockedLessonFees = false
     @State private var resyncTask: Task<Void, Never>?
 
     var body: some View {
@@ -31,6 +32,10 @@ struct ContentView: View {
         .tint(Theme.board)
         .environment(\.locale, Locale(identifier: "tr_TR"))
         .task {
+            if !didMigrateLockedLessonFees {
+                LessonFeeMigration.lockExistingFees(context: context)
+                didMigrateLockedLessonFees = true
+            }
             RecurringLessons.topUp(context: context)
             await AppNotifications.requestPermissionIfNeeded()
             await AppNotifications.resync(context: context)
@@ -49,6 +54,32 @@ struct ContentView: View {
             guard !Task.isCancelled else { return }
             await AppNotifications.resync(context: context)
             
+        }
+    }
+}
+
+enum LessonFeeMigration {
+    static func lockExistingFees(context: ModelContext) {
+        let lessons = (try? context.fetch(FetchDescriptor<Lesson>())) ?? []
+        let templates = (try? context.fetch(FetchDescriptor<RecurringLessonTemplate>())) ?? []
+        var didChange = false
+
+        for lesson in lessons {
+            if lesson.feeOverride == nil {
+                lesson.lockCurrentStandardFeeIfNeeded()
+            } else {
+                lesson.usesCustomFee = true
+            }
+            didChange = true
+        }
+
+        for template in templates {
+            template.usesCustomFee = template.feeOverride != nil
+            didChange = true
+        }
+
+        if didChange {
+            try? context.save()
         }
     }
 }

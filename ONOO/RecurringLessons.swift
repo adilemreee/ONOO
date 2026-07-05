@@ -39,10 +39,12 @@ enum RecurringLessons {
                 }
                 if clash { continue }
 
+                let fee = template.feeOverride ?? Lesson.standardFee(for: student, duration: template.duration)
                 let lesson = Lesson(student: student,
                                     date: slot,
                                     duration: template.duration,
-                                    feeOverride: template.feeOverride)
+                                    feeOverride: fee,
+                                    usesCustomFee: template.usesCustomFee)
                 context.insert(lesson)
                 lesson.student = student
                 lesson.sourceTemplate = template
