@@ -19,19 +19,46 @@ extension Color {
     }
 }
 
+extension UIColor {
+    convenience init(hex: UInt) {
+        self.init(red: CGFloat((hex >> 16) & 0xFF) / 255,
+                  green: CGFloat((hex >> 8) & 0xFF) / 255,
+                  blue: CGFloat(hex & 0xFF) / 255,
+                  alpha: 1)
+    }
+}
+
 enum Theme {
+    /// Açık/koyu moda göre otomatik renk
+    static func dynamic(light: UInt, dark: UInt) -> Color {
+        Color(uiColor: UIColor { trait in
+            trait.userInterfaceStyle == .dark ? UIColor(hex: dark) : UIColor(hex: light)
+        })
+    }
+
     /// Kara tahta yeşili — ana marka rengi
-    static let board = Color(hex: 0x1E4B39)
-    static let boardDark = Color(hex: 0x143528)
-    /// Kağıt/krem zemin
-    static let paper = Color(hex: 0xF7F2E7)
-    static let ink = Color(hex: 0x26303E)
-    static let inkSoft = Color(hex: 0x77808D)
-    static let amber = Color(hex: 0xDF9E3B)
-    static let red = Color(hex: 0xC3503E)
-    static let blue = Color(hex: 0x3C66AE)
-    static let green = Color(hex: 0x3E8E5F)
-    static let line = Color(hex: 0x26303E).opacity(0.08)
+    static let board = dynamic(light: 0x1E4B39, dark: 0x2F6C51)
+    static let boardDark = dynamic(light: 0x143528, dark: 0x224E3B)
+    /// Kağıt/krem zemin — koyu modda gece defteri
+    static let paper = dynamic(light: 0xF7F2E7, dark: 0x1A1915)
+    /// Kart yüzeyi
+    static let card = dynamic(light: 0xFFFFFF, dark: 0x262420)
+    static let ink = Color(uiColor: inkUI)
+    static let inkSoft = dynamic(light: 0x77808D, dark: 0x9C988D)
+    static let amber = dynamic(light: 0xDF9E3B, dark: 0xE6AF58)
+    static let red = dynamic(light: 0xC3503E, dark: 0xDE705F)
+    static let blue = dynamic(light: 0x3C66AE, dark: 0x7397D0)
+    static let green = dynamic(light: 0x3E8E5F, dark: 0x5CB283)
+    static let line = Color(uiColor: UIColor { trait in
+        trait.userInterfaceStyle == .dark
+            ? UIColor(hex: 0xEAE6DB).withAlphaComponent(0.10)
+            : UIColor(hex: 0x26303E).withAlphaComponent(0.08)
+    })
+
+    /// Navigasyon başlıkları gibi UIKit tarafı için dinamik mürekkep
+    static let inkUI = UIColor { trait in
+        trait.userInterfaceStyle == .dark ? UIColor(hex: 0xEAE6DB) : UIColor(hex: 0x26303E)
+    }
 
     /// Öğrenci renk paleti
     static let palette: [Color] = [
@@ -109,7 +136,7 @@ extension View {
             .padding(padding)
             .background(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(Color.white)
+                    .fill(Theme.card)
                     .shadow(color: .black.opacity(0.05), radius: 10, y: 4)
             )
             .overlay(
@@ -344,7 +371,7 @@ struct LessonRow: View {
             }
         }
         .padding(12)
-        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.white))
+        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Theme.card))
         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.line, lineWidth: 1))
     }
 

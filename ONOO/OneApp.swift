@@ -61,11 +61,11 @@ struct OneApp: App {
         let nav = UINavigationBar.appearance()
         nav.largeTitleTextAttributes = [
             .font: serif(32, .bold),
-            .foregroundColor: UIColor(Theme.ink)
+            .foregroundColor: Theme.inkUI
         ]
         nav.titleTextAttributes = [
             .font: serif(17, .semibold),
-            .foregroundColor: UIColor(Theme.ink)
+            .foregroundColor: Theme.inkUI
         ]
     }
 }

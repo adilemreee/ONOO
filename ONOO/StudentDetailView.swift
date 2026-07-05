@@ -559,7 +559,7 @@ struct ContactActionButton: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10)
-            .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.white))
+            .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Theme.card))
             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.line, lineWidth: 1))
         }
         .buttonStyle(.plain)

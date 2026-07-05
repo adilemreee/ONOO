@@ -118,8 +118,10 @@ struct StickyNoteCard: View {
     var onEdit: () -> Void
 
     private static let noteColors: [Color] = [
-        Color(hex: 0xFDF0C2), Color(hex: 0xE3F2DC),
-        Color(hex: 0xE4EDFB), Color(hex: 0xFBE5DE)
+        Theme.dynamic(light: 0xFDF0C2, dark: 0x46402A),
+        Theme.dynamic(light: 0xE3F2DC, dark: 0x2E4433),
+        Theme.dynamic(light: 0xE4EDFB, dark: 0x2C3B50),
+        Theme.dynamic(light: 0xFBE5DE, dark: 0x4A322B)
     ]
 
     private var noteColor: Color {

@@ -179,7 +179,7 @@ struct ScheduleView: View {
             .padding(.vertical, 8)
             .background(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(isSelected ? Theme.board : Color.white)
+                    .fill(isSelected ? Theme.board : Theme.card)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -556,9 +556,9 @@ struct MonthCalendarView: View {
         // Yoğunluğa göre ısı haritası tonu
         let fill: Color = {
             if isSelected { return Theme.board }
-            guard isCurrentMonth else { return Color.white.opacity(0.48) }
+            guard isCurrentMonth else { return Theme.card.opacity(0.48) }
             switch count {
-            case 0: return .white
+            case 0: return Theme.card
             case 1: return Theme.board.opacity(0.10)
             case 2: return Theme.board.opacity(0.22)
             default: return Theme.board.opacity(0.36)
@@ -568,7 +568,7 @@ struct MonthCalendarView: View {
         let numberColor: Color = {
             if isSelected { return .white }
             if !isCurrentMonth { return Theme.inkSoft.opacity(0.45) }
-            return count >= 2 ? Theme.boardDark : Theme.ink
+            return Theme.ink
         }()
 
         return Button {
@@ -582,7 +582,7 @@ struct MonthCalendarView: View {
                 if isCurrentMonth && count > 0 {
                     Text("\(count) ders")
                         .font(.system(size: 8, weight: .semibold))
-                        .foregroundStyle(isSelected ? .white.opacity(0.85) : Theme.boardDark.opacity(0.8))
+                        .foregroundStyle(isSelected ? .white.opacity(0.85) : Theme.ink.opacity(0.75))
                         .frame(height: 10)
                 } else {
                     Color.clear.frame(height: 10)
