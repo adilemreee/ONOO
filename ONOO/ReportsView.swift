@@ -10,6 +10,7 @@ import SwiftData
 import Charts
 
 struct ReportsView: View {
+    @Environment(ProStore.self) private var proStore
     @Query(sort: \Lesson.date) private var lessons: [Lesson]
     @Query(sort: \Payment.date) private var payments: [Payment]
     @Query(sort: \Student.name) private var students: [Student]
@@ -37,15 +38,23 @@ struct ReportsView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 22) {
-                overviewGrid
-                incomeChart
-                hoursChart
-                statusChart
-                collectionCard
+            if proStore.isPro {
+                VStack(spacing: 22) {
+                    overviewGrid
+                    incomeChart
+                    hoursChart
+                    statusChart
+                    collectionCard
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 24)
+            } else {
+                ProLockedView(icon: "chart.bar.xaxis",
+                              title: "Raporlar Pro'da",
+                              message: "Aylık gelir grafiği, öğrenci bazında saatler, ders durumu dağılımı ve tahsilat oranı Ders Defteri Pro ile açılır.")
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 24)
         }
         .background(Theme.paper.ignoresSafeArea())
         .navigationTitle("Raporlar")

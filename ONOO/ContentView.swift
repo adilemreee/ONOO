@@ -56,4 +56,5 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .modelContainer(for: [Student.self, Lesson.self, Payment.self, Homework.self, TopicProgress.self, RecurringLessonTemplate.self], inMemory: true)
+        .environment(ProStore())
 }

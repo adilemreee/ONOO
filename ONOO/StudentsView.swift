@@ -10,10 +10,16 @@ import SwiftData
 
 struct StudentsView: View {
     @Environment(\.modelContext) private var context
+    @Environment(ProStore.self) private var proStore
     @Query(sort: \Student.name) private var students: [Student]
     @State private var search = ""
     @State private var showForm = false
     @State private var showArchive = false
+    @State private var showPaywall = false
+
+    private var activeCount: Int {
+        students.filter { !$0.isArchived }.count
+    }
 
     private var filtered: [Student] {
         let active = students.filter { !$0.isArchived }
@@ -79,7 +85,11 @@ struct StudentsView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        showForm = true
+                        if proStore.canAddStudent(activeCount: activeCount) {
+                            showForm = true
+                        } else {
+                            showPaywall = true
+                        }
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -91,6 +101,9 @@ struct StudentsView: View {
             .sheet(isPresented: $showArchive) {
                 ArchivedStudentsView()
             }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
+            }
         }
     }
 }
@@ -100,10 +113,23 @@ struct StudentsView: View {
 struct ArchivedStudentsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
+    @Environment(ProStore.self) private var proStore
     @Query(sort: \Student.name) private var students: [Student]
+    @State private var showPaywall = false
 
     private var archived: [Student] {
         students.filter(\.isArchived)
+    }
+
+    /// Aktife almak da öğrenci limitine tabidir
+    private func unarchive(_ student: Student) {
+        let activeCount = students.filter { !$0.isArchived }.count
+        if proStore.canAddStudent(activeCount: activeCount) {
+            student.isArchived = false
+            try? context.save()
+        } else {
+            showPaywall = true
+        }
     }
 
     var body: some View {
@@ -125,8 +151,7 @@ struct ArchivedStudentsView: View {
                                 .buttonStyle(.plain)
 
                                 Button {
-                                    student.isArchived = false
-                                    try? context.save()
+                                    unarchive(student)
                                 } label: {
                                     Image(systemName: "arrow.uturn.backward.circle.fill")
                                         .font(.title2)
@@ -136,8 +161,7 @@ struct ArchivedStudentsView: View {
                             }
                             .contextMenu {
                                 Button {
-                                    student.isArchived = false
-                                    try? context.save()
+                                    unarchive(student)
                                 } label: {
                                     Label("Aktife Al", systemImage: "arrow.uturn.backward")
                                 }
@@ -161,6 +185,9 @@ struct ArchivedStudentsView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Tamam") { dismiss() }
                 }
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
             }
         }
     }

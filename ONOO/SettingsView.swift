@@ -22,8 +22,10 @@ struct SettingsView: View {
     @AppStorage("homeworkRemindersEnabled") private var homeworkRemindersEnabled = true
     @AppStorage("homeworkReminderHour") private var homeworkReminderHour = 9
     @AppStorage("teacherName") private var teacherName = ""
+    @Environment(ProStore.self) private var proStore
     @State private var permissionDenied = false
     @State private var exportURLs: [URL] = []
+    @State private var showPaywall = false
 
     private let leadOptions = [15, 30, 60, 120]
     private let homeworkHourOptions = [9, 12, 18, 21]
@@ -31,6 +33,48 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if ProStore.purchasesEnabled {
+                Section {
+                    if proStore.isPro {
+                        Label {
+                            Text("Ders Defteri Pro aktif")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Theme.ink)
+                        } icon: {
+                            Image(systemName: "checkmark.seal.fill")
+                                .foregroundStyle(Theme.green)
+                        }
+                    } else {
+                        Button {
+                            showPaywall = true
+                        } label: {
+                            HStack {
+                                Label {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Ders Defteri Pro'ya Geç")
+                                            .font(.subheadline.weight(.bold))
+                                            .foregroundStyle(Theme.ink)
+                                        Text("Sınırsız öğrenci, raporlar ve dışa aktarma")
+                                            .font(.caption)
+                                            .foregroundStyle(Theme.inkSoft)
+                                    }
+                                } icon: {
+                                    Image(systemName: "crown.fill")
+                                        .foregroundStyle(Theme.amber)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption.weight(.bold))
+                                    .foregroundStyle(Theme.inkSoft.opacity(0.5))
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } header: {
+                    Text("Abonelik")
+                }
+                }
+
                 Section {
                     TextField("Öğretmen adı", text: $teacherName)
                         .textContentType(.name)
@@ -93,23 +137,40 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    Button {
-                        exportURLs = AppDataExport.makeCSVFiles(students: students,
-                                                                 lessons: lessons,
-                                                                 payments: payments,
-                                                                 homeworks: homeworks)
-                    } label: {
-                        Label("CSV Dosyalarını Hazırla", systemImage: "tablecells")
-                    }
-                    if !exportURLs.isEmpty {
-                        ShareLink(items: exportURLs) {
-                            Label("CSV Dosyalarını Paylaş", systemImage: "square.and.arrow.up")
+                    if proStore.isPro {
+                        Button {
+                            exportURLs = AppDataExport.makeCSVFiles(students: students,
+                                                                     lessons: lessons,
+                                                                     payments: payments,
+                                                                     homeworks: homeworks)
+                        } label: {
+                            Label("CSV Dosyalarını Hazırla", systemImage: "tablecells")
                         }
+                        if !exportURLs.isEmpty {
+                            ShareLink(items: exportURLs) {
+                                Label("CSV Dosyalarını Paylaş", systemImage: "square.and.arrow.up")
+                            }
+                        }
+                    } else {
+                        Button {
+                            showPaywall = true
+                        } label: {
+                            HStack {
+                                Label("CSV Dışa Aktarma", systemImage: "tablecells")
+                                Spacer()
+                                Image(systemName: "lock.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(Theme.amber)
+                            }
+                        }
+                        .buttonStyle(.plain)
                     }
                 } header: {
                     Text("Dışa Aktar")
                 } footer: {
-                    Text("Öğrenci, ders, ödeme ve ödev kayıtları ayrı CSV dosyaları olarak hazırlanır.")
+                    Text(proStore.isPro
+                         ? "Öğrenci, ders, ödeme ve ödev kayıtları ayrı CSV dosyaları olarak hazırlanır."
+                         : "CSV dışa aktarma Ders Defteri Pro aboneliğiyle kullanılabilir.")
                 }
             }
             .scrollContentBackground(.hidden)
@@ -120,6 +181,9 @@ struct SettingsView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Tamam") { dismiss() }
                 }
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
             }
             .task {
                 let settings = await UNUserNotificationCenter.current().notificationSettings()

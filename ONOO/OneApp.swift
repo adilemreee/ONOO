@@ -10,6 +10,8 @@ import SwiftData
 struct OneApp: App {
     let container: ModelContainer
     @State private var showSplash = true
+    @State private var proStore = ProStore()
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 
     init() {
         let schema = Schema([Student.self, Lesson.self, Payment.self, Homework.self, TopicProgress.self, RecurringLessonTemplate.self])
@@ -33,10 +35,15 @@ struct OneApp: App {
         WindowGroup {
             ZStack {
                 ContentView()
+                if !hasCompletedOnboarding {
+                    OnboardingView()
+                        .transition(.opacity)
+                        .zIndex(1)
+                }
                 if showSplash {
                     SplashView()
                         .transition(.opacity)
-                        .zIndex(1)
+                        .zIndex(2)
                 }
             }
             .task {
@@ -45,6 +52,7 @@ struct OneApp: App {
                     showSplash = false
                 }
             }
+            .environment(proStore)
         }
         .modelContainer(container)
     }
