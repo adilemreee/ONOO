@@ -6,6 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXCopyFilesBuildPhase section */
+		F9B9625E2FFBAF41004865D9 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		F9EEA6CA2FFADFC100C6E11E /* ONOO.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ONOO.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -55,6 +68,7 @@
 				F9EEA6C62FFADFC100C6E11E /* Sources */,
 				F9EEA6C72FFADFC100C6E11E /* Frameworks */,
 				F9EEA6C82FFADFC100C6E11E /* Resources */,
+				F9B9625E2FFBAF41004865D9 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
@@ -254,7 +268,7 @@
 				CODE_SIGN_ENTITLEMENTS = ONOO/ONOO.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 20;
 				DEVELOPMENT_TEAM = GHV7BT96W7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -291,7 +305,7 @@
 				CODE_SIGN_ENTITLEMENTS = ONOO/ONOO.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 20;
 				DEVELOPMENT_TEAM = GHV7BT96W7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
